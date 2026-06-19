@@ -21,10 +21,10 @@ namespace Roulin
                 http_mode    = httpMode,
                 max_attempts = Math.Max(1, maxAttempts),
             };
-            _session = RoulinFetchNative.ac_fetch_session_new(ref cfg);
+            _session = RoulinFetchNative.rln_fetch_session_new(ref cfg);
             if (_session == IntPtr.Zero)
                 throw new Exception(
-                    $"ac_fetch_session_new failed: {RoulinNative.LastError()}");
+                    $"rln_fetch_session_new failed: {RoulinNative.LastError()}");
         }
 
         public async UniTask<byte[]> GetAsync(
@@ -51,7 +51,7 @@ namespace Roulin
             ulong handle;
             try
             {
-                handle = RoulinFetchNative.ac_fetch_enqueue(_session, url, hashPtr);
+                handle = RoulinFetchNative.rln_fetch_enqueue(_session, url, hashPtr);
             }
             finally
             {
@@ -59,7 +59,7 @@ namespace Roulin
             }
             if (handle == 0)
                 throw new Exception(
-                    $"ac_fetch_enqueue {url}: {RoulinNative.LastError()}");
+                    $"rln_fetch_enqueue {url}: {RoulinNative.LastError()}");
 
             try
             {
@@ -67,12 +67,12 @@ namespace Roulin
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        RoulinFetchNative.ac_fetch_cancel(_session, handle);
+                        RoulinFetchNative.rln_fetch_cancel(_session, handle);
                         DrainTerminal(handle);
                         ct.ThrowIfCancellationRequested();
                     }
 
-                    int rc = RoulinFetchNative.ac_fetch_poll(
+                    int rc = RoulinFetchNative.rln_fetch_poll(
                         _session, handle,
                         out ulong bytesDone, out ulong bytesTotal,
                         out IntPtr buf, out UIntPtr len, out int _);
@@ -85,7 +85,7 @@ namespace Roulin
                         if (n > 0 && buf != IntPtr.Zero)
                             Marshal.Copy(buf, data, 0, n);
                         if (buf != IntPtr.Zero)
-                            RoulinFetchNative.ac_fetch_free_buf(buf);
+                            RoulinFetchNative.rln_fetch_free_buf(buf);
                         return data;
                     }
                     if (rc == -1)
@@ -102,7 +102,7 @@ namespace Roulin
             }
             catch when (!ct.IsCancellationRequested)
             {
-                RoulinFetchNative.ac_fetch_cancel(_session, handle);
+                RoulinFetchNative.rln_fetch_cancel(_session, handle);
                 DrainTerminal(handle);
                 throw;
             }
@@ -110,12 +110,12 @@ namespace Roulin
 
         void DrainTerminal(ulong handle)
         {
-            RoulinFetchNative.ac_fetch_poll(
+            RoulinFetchNative.rln_fetch_poll(
                 _session, handle,
                 out _, out _,
                 out IntPtr buf, out _, out _);
             if (buf != IntPtr.Zero)
-                RoulinFetchNative.ac_fetch_free_buf(buf);
+                RoulinFetchNative.rln_fetch_free_buf(buf);
         }
 
         public void Dispose()
@@ -124,7 +124,7 @@ namespace Roulin
             _disposed = true;
             if (_session != IntPtr.Zero)
             {
-                RoulinFetchNative.ac_fetch_session_free(_session);
+                RoulinFetchNative.rln_fetch_session_free(_session);
                 _session = IntPtr.Zero;
             }
         }

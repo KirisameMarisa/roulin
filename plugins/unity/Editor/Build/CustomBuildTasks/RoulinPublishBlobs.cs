@@ -29,14 +29,14 @@ namespace Roulin.Editor.Build.CustomBuildTasks
 
 
         [DllImport("roulin_core", CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe void ac_compute_blake3(void* data, UIntPtr len, byte* outHash);
+        private static extern unsafe void rln_compute_blake3(void* data, UIntPtr len, byte* outHash);
 
         public static unsafe string Blake3Hex(byte[] data)
         {
             var hash = new byte[32];
             fixed (byte* dp = data, hp = hash)
             {
-                ac_compute_blake3(dp, (UIntPtr)data.Length, hp);
+                rln_compute_blake3(dp, (UIntPtr)data.Length, hp);
             }
 
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();

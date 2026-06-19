@@ -14,7 +14,7 @@ namespace Roulin
         internal RoulinBlobStream(IntPtr blob)
         {
             _blob     = blob;
-            _length   = (long)(ulong)RoulinNative.ac_blob_size(blob);
+            _length   = (long)(ulong)RoulinNative.rln_blob_size(blob);
             _position = 0;
         }
 
@@ -42,14 +42,14 @@ namespace Roulin
 
             fixed (byte* dst = &buffer[offset])
             {
-                long read = RoulinNative.ac_blob_read(
+                long read = RoulinNative.rln_blob_read(
                     _blob, dst,
                     (UIntPtr)(ulong)_position,
                     (UIntPtr)(ulong)toRead);
 
                 if (read < 0)
                     throw new IOException(
-                        $"ac_blob_read failed: {RoulinNative.LastError()}");
+                        $"rln_blob_read failed: {RoulinNative.LastError()}");
 
                 _position += read;
                 return (int)read;   // bounded by toRead (= int) so cast is safe
@@ -81,7 +81,7 @@ namespace Roulin
         {
             if (!_disposed && _blob != IntPtr.Zero)
             {
-                RoulinNative.ac_blob_release(_blob);
+                RoulinNative.rln_blob_release(_blob);
                 _blob    = IntPtr.Zero;
                 _disposed = true;
             }

@@ -204,7 +204,7 @@ namespace Roulin
             if (s_Cache is RoulinCache defaultCache)
                 defaultCache.Locator = newLocator;
 
-            RoulinNative.ac_parcel_close(oldParcel);
+            RoulinNative.rln_parcel_close(oldParcel);
 
             // GC old-revision-only blobs.
             await s_Cache.PurgeOrphansAsync(newLocator.GetPinnedBlobHashes());
@@ -218,10 +218,10 @@ namespace Roulin
             string indexLocal = Path.Combine(LocalDir, "index", revision);
             await s_Fetcher.DownloadFileAsync(indexUrl, indexLocal, ct);
 
-            IntPtr parcel = RoulinNative.ac_parcel_open(LocalDir, revision);
+            IntPtr parcel = RoulinNative.rln_parcel_open(LocalDir, revision);
             if (parcel == IntPtr.Zero)
                 throw new Exception(
-                    $"Roulin: ac_parcel_open failed: {RoulinNative.LastError()}");
+                    $"Roulin: rln_parcel_open failed: {RoulinNative.LastError()}");
             return parcel;
         }
 
@@ -288,7 +288,7 @@ namespace Roulin
             }
             if (Parcel != IntPtr.Zero)
             {
-                RoulinNative.ac_parcel_close(Parcel);
+                RoulinNative.rln_parcel_close(Parcel);
                 Parcel = IntPtr.Zero;
             }
             if(s_Http != null) 

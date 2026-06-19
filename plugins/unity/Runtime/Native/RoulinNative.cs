@@ -14,53 +14,53 @@ namespace Roulin
 
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        static extern IntPtr ac_last_error();
+        static extern IntPtr rln_last_error();
 
         internal static string LastError() =>
-            Marshal.PtrToStringAnsi(ac_last_error()) ?? string.Empty;
+            Marshal.PtrToStringAnsi(rln_last_error()) ?? string.Empty;
 
 
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        static extern void ac_compute_blake3(void* data, UIntPtr len, byte* outHash);
+        static extern void rln_compute_blake3(void* data, UIntPtr len, byte* outHash);
 
 
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr ac_parcel_open(
+        internal static extern IntPtr rln_parcel_open(
             [MarshalAs(UnmanagedType.LPUTF8Str)] string localDir,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string revisionId);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_parcel_close(IntPtr parcel);
+        internal static extern void rln_parcel_close(IntPtr parcel);
 
 
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr ac_parcel_get(
+        internal static extern IntPtr rln_parcel_get(
             IntPtr parcel,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string address);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_blob_release(IntPtr blob);
+        internal static extern void rln_blob_release(IntPtr blob);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern UIntPtr ac_blob_size(IntPtr blob);
+        internal static extern UIntPtr rln_blob_size(IntPtr blob);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long ac_blob_read(IntPtr blob, void* buf,
+        internal static extern long rln_blob_read(IntPtr blob, void* buf,
                                                   UIntPtr offset, UIntPtr len);
 
 
 
-        // Frees a const char** array previously returned by ac_index_bundle_deps_for.
+        // Frees a const char** array previously returned by rln_index_bundle_deps_for.
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_strings_free(IntPtr strs, UIntPtr count);
+        internal static extern void rln_strings_free(IntPtr strs, UIntPtr count);
 
         // Returns the deps for one bundle (binary search). NULL when no deps.
-        // Caller must free the result with ac_strings_free.
+        // Caller must free the result with rln_strings_free.
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr ac_index_bundle_deps_for(IntPtr parcel,
+        internal static extern IntPtr rln_index_bundle_deps_for(IntPtr parcel,
                                                                  byte* bundleHash,
                                                                  out UIntPtr outCount);
 
@@ -73,7 +73,7 @@ namespace Roulin
                                               IntPtr userdata);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_index_for_each_bundle_deps(IntPtr parcel,
+        internal static extern void rln_index_for_each_bundle_deps(IntPtr parcel,
                                                                     BundleDepsFn fn,
                                                                     IntPtr userdata);
 
@@ -88,13 +88,13 @@ namespace Roulin
                                          IntPtr userdata);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_parcel_foreach(IntPtr parcel, ForEachFn fn, IntPtr userdata);
+        internal static extern void rln_parcel_foreach(IntPtr parcel, ForEachFn fn, IntPtr userdata);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern UIntPtr ac_index_types_count(IntPtr parcel);
+        internal static extern UIntPtr rln_index_types_count(IntPtr parcel);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern IntPtr ac_index_type_at(IntPtr parcel, UIntPtr idx);
+        internal static extern IntPtr rln_index_type_at(IntPtr parcel, UIntPtr idx);
 
         // Read a uint32 array of `count` entries into a managed array.
         internal static uint[] ReadUInt32Array(IntPtr ptr, UIntPtr count)
@@ -124,18 +124,18 @@ namespace Roulin
 
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int ac_parcel_diff(
+        internal static extern int rln_parcel_diff(
             IntPtr remoteParcel,
             [MarshalAs(UnmanagedType.LPUTF8Str)] string localDir,
             out IntPtr outBlobs, out UIntPtr outCount);
 
         [DllImport(Lib, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void ac_diff_free(IntPtr blobs, UIntPtr count);
+        internal static extern void rln_diff_free(IntPtr blobs, UIntPtr count);
 
 
 
         // Read a const char** array out of native memory then free it via
-        // ac_strings_free. Used by ac_index_bundle_deps_for results.
+        // rln_strings_free. Used by rln_index_bundle_deps_for results.
         internal static string[] ReadAndFreeStrings(IntPtr strs, UIntPtr count)
         {
             int n = (int)count;
@@ -144,7 +144,7 @@ namespace Roulin
             var arr    = (IntPtr*)strs;
             for (int i = 0; i < n; i++)
                 result[i] = Marshal.PtrToStringAnsi(arr[i]) ?? string.Empty;
-            ac_strings_free(strs, count);
+            rln_strings_free(strs, count);
             return result;
         }
 
@@ -162,7 +162,7 @@ namespace Roulin
         internal static void ComputeBlake3(byte[] data, byte[] outHash)
         {
             fixed (byte* dp = data, hp = outHash)
-                ac_compute_blake3(dp, (UIntPtr)(data?.Length ?? 0), hp);
+                rln_compute_blake3(dp, (UIntPtr)(data?.Length ?? 0), hp);
         }
 
         // Byte[] to lower-hex string.

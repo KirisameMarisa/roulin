@@ -77,23 +77,23 @@ namespace Roulin
         {
             // Resolve the Index's type intern table to System.Type instances.
             // Address.type_idxs (from FFI) point into this array.
-            int typesCount = (int)RoulinNative.ac_index_types_count(parcel);
+            int typesCount = (int)RoulinNative.rln_index_types_count(parcel);
             var types = new Type[typesCount];
             for (int i = 0; i < typesCount; i++)
             {
-                var p = RoulinNative.ac_index_type_at(parcel, (UIntPtr)i);
+                var p = RoulinNative.rln_index_type_at(parcel, (UIntPtr)i);
                 var name = p == IntPtr.Zero ? null : Marshal.PtrToStringAnsi(p);
                 types[i] = string.IsNullOrEmpty(name) ? null : Type.GetType(name, throwOnError: false);
             }
 
             var assetCtx    = new AssetCollectCtx();
             var assetHandle = GCHandle.Alloc(assetCtx);
-            try     { RoulinNative.ac_parcel_foreach(parcel, OnCollectAsset, GCHandle.ToIntPtr(assetHandle)); }
+            try     { RoulinNative.rln_parcel_foreach(parcel, OnCollectAsset, GCHandle.ToIntPtr(assetHandle)); }
             finally { assetHandle.Free(); }
 
             var depsCtx    = new BundleDepsCtx();
             var depsHandle = GCHandle.Alloc(depsCtx);
-            try     { RoulinNative.ac_index_for_each_bundle_deps(parcel, OnCollectBundleDeps, GCHandle.ToIntPtr(depsHandle)); }
+            try     { RoulinNative.rln_index_for_each_bundle_deps(parcel, OnCollectBundleDeps, GCHandle.ToIntPtr(depsHandle)); }
             finally { depsHandle.Free(); }
 
             // Bundle→bundle deps wired in a second pass once all bundles exist.
